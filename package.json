@@ -1,0 +1,24 @@
+{
+  "name": "proinvest",
+  "version": "1.0.0",
+  "description": "Proinvest Investment Platform with PostgreSQL and Prisma",
+  "main": "index.js",
+  "scripts": {
+    "start": "php -S 0.0.0.0:$PORT -t .",
+    "postinstall": "prisma generate",
+    "migrate": "prisma migrate deploy",
+    "generate": "prisma generate",
+    "studio": "prisma studio",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.0.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.0.0"
+  }
+}

@@ -1,0 +1,38 @@
+services:
+  # Web service for the main application
+  - type: web
+    name: proinvest
+    env: docker
+    buildCommand: |
+      # Install PHP extensions
+      apt-get update && apt-get install -y libpq-dev
+      docker-php-ext-install pdo pdo_pgsql
+      # Install Node.js dependencies
+      npm install
+      # Generate Prisma client
+      npx prisma generate
+    startCommand: php -S 0.0.0.0:$PORT -t .
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: proinvest-db
+          property: connectionString
+      - key: CI_ENV
+        value: production
+      - key: APP_URL
+        sync: false
+      # Add other environment variables as needed
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+
+# PostgreSQL database
+databases:
+  - name: proinvest-db
+    plan: free
+    postgresMajorVersion: 15

@@ -1,0 +1,234 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Sessions table
+model Session {
+  id        String   @id @default(uuid())
+  ipAddress String   @map("ip_address") @db.VarChar(45)
+  userAgent String?  @map("user_agent") @db.VarChar(120)
+  timestamp Int
+  data      String   @db.Text
+
+  @@map("ci_sessions")
+}
+
+// Addons API table
+model AddonsApi {
+  id                  Int      @id @default(autoincrement())
+  name                String   @db.VarChar(128)
+  logo                String   @db.VarChar(128)
+  publicKey           String   @map("public_key") @db.VarChar(128)
+  secretKey           String   @map("secret_key") @db.VarChar(128)
+  ipnSecret           String   @map("IPN_secret") @db.VarChar(128)
+  litecoinApi         String   @map("litecoin_API") @db.VarChar(255)
+  bitcoinApi          String   @map("bitcoin_API") @db.VarChar(255)
+  dogecoinApi         String   @map("dogecoin_API") @db.VarChar(255)
+  litecoinTestnetApi  String   @map("litecoin_testnet_API") @db.VarChar(255)
+  bitcoinTestnetApi   String   @map("bitcoin_testnet_API") @db.VarChar(255)
+  dogecoinTestnetApi  String   @map("dogecoin_testnet_API") @db.VarChar(255)
+  merchantName        String?  @db.VarChar(255)
+  merchantID          String   @db.VarChar(128)
+  baseUrl             String   @map("base_url") @db.VarChar(128)
+  env                 String   @db.VarChar(128)
+  currency            String   @db.VarChar(128)
+  status              Boolean  @default(true)
+  type                String   @db.VarChar(255)
+  purchased           Int      @default(0)
+  createdDtm          DateTime
+
+  @@map("tbl_addons_api")
+}
+
+// CoinPayments table
+model CoinPayments {
+  id                Int       @id @default(autoincrement())
+  userId            Int       @map("userId")
+  planId            Int       @map("planId")
+  amount1           Float     @db.DoublePrecision
+  amount2           Float     @db.DoublePrecision
+  coin1             String    @db.VarChar(10)
+  coin2             String    @db.VarChar(10)
+  address           String    @db.VarChar(255)
+  txnId             String    @map("txn_id") @db.VarChar(255)
+  status            Int       @default(0)
+  statusUrl         String    @map("status_url") @db.VarChar(255)
+  qrcodeUrl         String    @map("qrcode_url") @db.VarChar(255)
+  confirmsNeeded    Int       @map("confirms_needed") @default(0)
+  timeout           Int       @default(0)
+  checkoutUrl       String    @map("checkout_url") @db.VarChar(255)
+  statusCode        String    @map("status_code") @db.VarChar(50)
+  paymentId         String?   @map("payment_id") @db.VarChar(255)
+  paymentMethod     String    @map("payment_method") @db.VarChar(20)
+  verifyCode        String    @map("verifyCode") @db.VarChar(128)
+  createdDtm        DateTime
+
+  @@map("tbl_coinpayments")
+}
+
+// Content table
+model Content {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  description String   @db.Text
+  slug        String   @db.VarChar(255)
+  template    Int
+  type        String   @db.VarChar(20)
+  status      Int      @default(1)
+  createdBy   Int      @map("createdBy")
+  createdDtm  DateTime
+
+  @@map("tbl_content")
+}
+
+// Deposits table
+model Deposit {
+  id           Int       @id @default(autoincrement())
+  txnCode      String    @unique @db.VarChar(255)
+  userId       Int
+  planId       Int
+  amount       Float     @db.DoublePrecision
+  paymentMethod String    @db.VarChar(20)
+  maturityDtm  DateTime
+  depositDtm   DateTime? @default(now())
+  status       Int       @default(0)
+  isDeleted    Boolean   @default(false) @map("isDeleted")
+  createdBy    Int       @map("createdBy")
+  createdDtm   DateTime
+
+  @@map("tbl_deposits")
+}
+
+// Earnings table
+model Earning {
+  id         Int       @id @default(autoincrement())
+  txnCode    String    @unique @db.VarChar(255)
+  userId     Int
+  depositId  Int
+  type       Int       @default(0)
+  emailSent  Boolean   @default(false) @map("email_sent")
+  amount     Float     @db.DoublePrecision
+  createdDtm DateTime
+  
+  @@map("tbl_earnings")
+}
+
+// Main User model
+model User {
+  userId         Int       @id @default(autoincrement())
+  email          String    @unique @db.VarChar(128)
+  password       String    @db.VarChar(128)
+  firstName      String    @db.VarChar(50)
+  lastName       String    @db.VarChar(50)
+  mobile         String    @db.VarChar(20)
+  roleId         Int
+  isVerified     Boolean   @default(false) @map("isVerified")
+  isDeleted      Boolean   @default(false) @map("isDeleted")
+  isActive       Boolean   @default(true) @map("isActive")
+  verificationCode String  @db.VarChar(128)
+  resetPasswordCode String? @db.VarChar(128)
+  twoFactorAuth  Boolean   @default(false) @map("twoFactorAuth")
+  twoFactorAuthCode String? @db.VarChar(128)
+  referrerId     Int?      @map("referrerId")
+  referralCode   String    @db.VarChar(128)
+  earningsWallet Float     @default(0) @db.DoublePrecision
+  createdBy      Int       @map("createdBy")
+  createdDtm     DateTime
+  updatedBy      Int?      @map("updatedBy")
+  updatedDtm     DateTime?
+  lastLogin      DateTime?
+
+  @@map("tbl_users")
+}
+
+// Plans model
+model Plan {
+  id              Int       @id @default(autoincrement())
+  name            String    @db.VarChar(100)
+  minInvestment   Float     @db.DoublePrecision
+  maxInvestment   Float     @db.DoublePrecision
+  profit          Float     @db.DoublePrecision
+  period          Int
+  maturity        Int
+  businessDays    Boolean   @default(false)
+  principalReturn Boolean   @default(false) @map("principalReturn")
+  intAfterMaturity Boolean  @default(false) @map("intAfterMaturity")
+  clientDisplay   Boolean   @default(true) @map("clientDisplay")
+  createdBy       Int       @map("createdBy")
+  createdDtm      DateTime
+
+  @@map("tbl_plans")
+}
+
+// Email templates
+model EmailTemplate {
+  id           Int      @id @default(autoincrement())
+  type         String   @db.VarChar(128)
+  mail_subject String   @db.VarChar(255)
+  mail_body    String   @db.Text
+  createdBy    Int      @map("createdBy")
+  createdDtm   DateTime
+
+  @@map("tbl_email_templates")
+}
+
+// Withdrawals
+model Withdrawal {
+  id            Int       @id @default(autoincrement())
+  txnCode       String    @unique @db.VarChar(255)
+  userId        Int
+  amount        Float     @db.DoublePrecision
+  methodId      Int?
+  wallet        String?   @db.VarChar(255)
+  comment       String?   @db.Text
+  status        Int       @default(0)
+  isDeleted     Boolean   @default(false) @map("isDeleted")
+  createdBy     Int       @map("createdBy")
+  createdDtm    DateTime
+  completedDtm  DateTime?
+
+  @@map("tbl_withdrawals")
+}
+
+// Settings
+model Setting {
+  id               Int     @id @default(autoincrement())
+  name             String  @db.VarChar(255)
+  email            String  @db.VarChar(255)
+  logo             String  @db.VarChar(255)
+  favicon          String  @db.VarChar(255)
+  address          String  @db.Text
+  currency         String  @db.VarChar(10) @default("$")
+  shortcurrency    String  @db.VarChar(10) @default("USD")
+  bankName         String? @map("bank_name") @db.VarChar(255)
+  accountName      String? @map("account_name") @db.VarChar(255)
+  accountNumber    String? @map("account_number") @db.VarChar(255)
+  description      String? @db.Text
+  keywords         String? @db.Text
+  SMTPHost         String  @map("SMTPHost") @db.VarChar(255)
+  SMTPUser         String  @map("SMTPUser") @db.VarChar(255)
+  SMTPPass         String  @map("SMTPPass") @db.VarChar(255)
+  SMTPPort         String  @map("SMTPPort") @db.VarChar(255)
+  captchaSecret    String  @map("captchaSecret") @db.VarChar(255)
+  captchaSiteKey   String  @map("captchaSiteKey") @db.VarChar(255)
+  captcha          Boolean @default(false)
+  verification     Boolean @default(true)
+  emailVerification Boolean @default(true) @map("emailVerification")
+  smsVerification  Boolean @default(false) @map("smsVerification")
+  kyc              Boolean @default(true)
+  template         Int     @default(1)
+  refcom           Float   @default(0) @db.DoublePrecision
+  pendingDeposit   Boolean @default(true) @map("pendingDeposit")
+  autoWithdrawal   Boolean @default(false) @map("autoWithdrawal")
+  comType          String  @default("simple") @map("comType") @db.VarChar(50)
+
+  @@map("tbl_settings")
+}

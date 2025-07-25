@@ -1,4 +1,4 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 /*
 | -------------------------------------------------------------------
 | DATABASE CONNECTIVITY SETTINGS
@@ -34,26 +34,38 @@
 | the active record class
 */
 
-// The following values will probably need to be changed.
-$db['default']['username'] = "root";
-$db['default']['password'] = "";
-$db['default']['database'] = "testproinvest2.2";
+// Load environment variables from .env file
+if (file_exists(FCPATH . '.env')) {
+    $dotenv = parse_ini_file(FCPATH . '.env');
+    foreach ($dotenv as $key => $value) {
+        putenv("$key=$value");
+        $_ENV[$key] = $value;
+    }
+}
 
-// The following values can probably stay the same.
-$db['default']['hostname'] = "localhost";
-$db['default']['dbdriver'] = "mysqli"; //Updated to latest driver.
-$db['default']['dbprefix'] = "";
+// Parse DATABASE_URL for PostgreSQL configuration
+$database_url = getenv('DATABASE_URL') ?: 'postgresql://postgres:postgres@localhost:5432/proinvest?schema=public';
+
+$uri = parse_url($database_url);
+$db['default']['hostname'] = $uri['host'];
+$db['default']['username'] = $uri['user'];
+$db['default']['password'] = $uri['pass'];
+$db['default']['database'] = ltrim($uri['path'], '/');
+$db['default']['port']     = isset($uri['port']) ? $uri['port'] : 5432;
+
+// PostgreSQL configuration
+$db['default']['dbdriver'] = 'postgre';
+$db['default']['dbprefix'] = '';
 $db['default']['pconnect'] = FALSE;
-$db['default']['db_debug'] = FALSE;
+$db['default']['db_debug'] = (getenv('CI_ENV') !== 'production');
 $db['default']['cache_on'] = FALSE;
-$db['default']['cachedir'] = "";
-$db['default']['char_set'] = "utf8";
-$db['default']['dbcollat'] = "utf8_general_ci";
+$db['default']['cachedir'] = '';
+$db['default']['char_set'] = 'utf8';
+$db['default']['schema']   = 'public';
+$db['default']['dbcollat'] = 'utf8_general_ci';
 
-$active_group = "default";
+$active_group = 'default';
 $active_record = TRUE;
 
 /* End of file database.php */
 /* Location: ./application/config/database.php */
-
-
