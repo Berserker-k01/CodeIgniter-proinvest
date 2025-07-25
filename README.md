@@ -89,35 +89,118 @@ Proinvest is a comprehensive investment platform that supports HYIP (High-Yield 
 
 ## 🌐 Deploying to Render.com
 
-The application is fully configured for deployment on Render.com with PostgreSQL support.
+The application is fully configured for deployment on Render.com with PostgreSQL support. Follow this comprehensive guide to deploy ProInvest on Render's cloud platform.
 
-### Steps for Deployment
+### Detailed Deployment Guide
 
-1. **Create a Render account**
-   - Sign up at https://render.com
+1. **Create and Set Up Your Render Account**
+   - Go to [Render.com](https://render.com) and click "Sign Up" in the top right corner
+   - Sign up using GitHub (recommended) or email
+   - Verify your email address if required
+   - Complete account setup and add payment information if needed (you can use the free tier for testing)
 
-2. **Connect your GitHub repository**
-   - Link your GitHub account to Render
-   - Select the CodeIgniter-proinvest repository
+2. **Connect Your GitHub Repository**
+   - From the Render dashboard, click on "New +" button in the top right
+   - Select "Blueprint" from the dropdown menu
+   - In the "Connect a repository" section, click "Connect GitHub"
+   - Authorize Render to access your GitHub repositories when prompted
+   - Search for and select your "CodeIgniter-proinvest" repository
+   - Click "Connect"
 
-3. **Setup a new Web Service**
-   - Choose "Deploy from Blueprint" option
-   - Render will automatically detect the `render.yaml` configuration
-   - This will setup both the web application and the PostgreSQL database
+3. **Deploy Using the Blueprint**
+   - After connecting your repository, Render will detect the `render.yaml` file
+   - Click "Apply Blueprint" to start the configuration process
+   - Render will automatically create all the resources defined in your `render.yaml` file:
+     - A web service for the ProInvest application
+     - A PostgreSQL database instance
 
-4. **Configure environment variables**
-   - Render automatically sets up the DATABASE_URL
-   - Add additional environment variables as needed:
-     - SMTP settings for emails
-     - Payment gateway API keys
-     - App URL and other configuration
+4. **Monitor the Initial Deployment**
+   - Render will show the progress of creating each resource
+   - Wait for both the database and web service to be created
+   - The initial deployment may take 5-10 minutes
 
-5. **Deploy the application**
-   - Render will automatically build and deploy the application
-   - The build process includes installing dependencies, generating Prisma client, and database migration
+5. **Configure Environment Variables**
+   - Once resources are created, click on your web service from the dashboard
+   - Navigate to the "Environment" tab
+   - You'll see `DATABASE_URL` is already configured by Render
+   - Click "Add Environment Variable" to add additional required variables:
+     ```
+     CI_ENV=production
+     APP_NAME=ProInvest
+     APP_URL=[Your Render URL - will be https://proinvest.onrender.com or similar]
+     SMTP_HOST=[Your SMTP server]
+     SMTP_PORT=[Your SMTP port]
+     SMTP_USER=[Your SMTP username/email]
+     SMTP_PASS=[Your SMTP password]
+     ```
+   - Add payment gateway API keys as needed:
+     ```
+     STRIPE_PUBLIC_KEY=[Your Stripe public key]
+     STRIPE_SECRET_KEY=[Your Stripe secret key]
+     PAYPAL_CLIENT_ID=[Your PayPal client ID]
+     PAYPAL_CLIENT_SECRET=[Your PayPal client secret]
+     ```
+   - Click "Save Changes"
 
-6. **Access your deployed application**
-   - Once deployment is complete, access your application using the provided URL
+6. **Trigger a Manual Deployment**
+   - After configuring environment variables, go to the "Manual Deploy" section
+   - Select "Deploy latest commit" or choose a specific commit
+   - Click "Deploy"
+
+7. **Monitor the Deployment Process**
+   - Watch the logs in real-time to track the deployment progress
+   - The build process will:
+     - Install PHP extensions
+     - Install Node.js dependencies
+     - Generate the Prisma client
+     - Run database migrations
+     - Start the web service
+
+8. **Verify Successful Deployment**
+   - Once deployment is complete (usually takes 5-10 minutes), check for the "Your service is live 🎉" message
+   - Click on the URL provided (typically https://proinvest.onrender.com or your custom domain)
+   - Verify that the application loads correctly
+
+9. **Database Migration and Initialization**
+   - The deployment process automatically sets up your PostgreSQL database
+   - If you need to migrate data from an existing MySQL database:
+     - Clone your repository locally
+     - Configure both MySQL and PostgreSQL connection details in your `.env` file
+     - Run `node migration/mysql-to-postgres.js`
+
+10. **Set Up Custom Domain (Optional)**
+    - In your web service settings, navigate to the "Settings" tab
+    - Scroll to "Custom Domain"
+    - Click "Add Custom Domain" and follow the instructions
+    - Configure your domain registrar with the provided DNS settings
+
+11. **Setup Automatic Deployments (Recommended)**
+    - By default, Render automatically deploys when you push to your main/master branch
+    - To configure specific branch deployments:
+      - Go to the "Settings" tab of your web service
+      - Under "Build & Deploy" find "Auto-Deploy"
+      - Configure as needed
+
+### Troubleshooting Render Deployments
+
+- **Build Failures**: Check the build logs for specific error messages. Common issues include:
+  - Missing dependencies: Make sure all required packages are in package.json
+  - Environment variables: Ensure all required variables are properly set
+
+- **Database Connection Issues**: If your app can't connect to the database:
+  - Verify the DATABASE_URL environment variable is correctly set
+  - Check if your PostgreSQL instance is running (in Render dashboard)
+  - Test the connection using Prisma Studio: `npx prisma studio`
+
+- **Performance Issues**: If your app is slow on the free tier:
+  - Consider upgrading to a paid plan
+  - Optimize your database queries
+  - Enable caching mechanisms
+
+- **Custom Domain Not Working**:
+  - Ensure DNS propagation is complete (can take up to 48 hours)
+  - Verify SSL certificate is issued correctly
+  - Check DNS records match Render's instructions exactly
 
 ## 📦 Database Migration
 
