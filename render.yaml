@@ -3,15 +3,8 @@ services:
   - type: web
     name: proinvest
     env: docker
-    buildCommand: |
-      # Install PHP extensions
-      apt-get update && apt-get install -y libpq-dev
-      docker-php-ext-install pdo pdo_pgsql
-      # Install Node.js dependencies
-      npm install
-      # Generate Prisma client
-      npx prisma generate
-    startCommand: php -S 0.0.0.0:$PORT -t .
+    dockerfilePath: ./Dockerfile
+    dockerCommand: php -S 0.0.0.0:$PORT -t .
     envVars:
       - key: DATABASE_URL
         fromDatabase:
